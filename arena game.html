@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arena Game: Enhanced Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Particles -->
+    <div id="bg-particles"></div>
+
+    <!-- Main Menu -->
+    <div id="screen-menu" class="screen">
+        <div class="main-title">
+            <h1><i class="fas fa-crosshairs"></i> ARENA <span class="highlight">MAYHEM</span></h1>
+            <p class="subtitle">Advanced Physics Combat Simulator</p>
+        </div>
+        
+        <div class="menu-panel">
+            <div class="menu-grid">
+                <button class="menu-btn primary" onclick="goToSetup()">
+                    <i class="fas fa-play-circle"></i> START ARENA
+                </button>
+                <button class="menu-btn secondary" onclick="goToImporter()">
+                    <i class="fas fa-file-import"></i> IMPORT MOBS
+                </button>
+                <button class="menu-btn secondary" onclick="goToGallery()">
+                    <i class="fas fa-images"></i> UNIT GALLERY
+                </button>
+                <button class="menu-btn secondary" onclick="showTutorial()">
+                    <i class="fas fa-graduation-cap"></i> TUTORIAL
+                </button>
+                <button class="menu-btn danger" onclick="showCredits()">
+                    <i class="fas fa-info-circle"></i> CREDITS
+                </button>
+            </div>
+            
+            <div class="stats-bar">
+                <div class="stat">
+                    <i class="fas fa-users"></i>
+                    <span>Units Imported: <span id="total-units">0</span></span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-trophy"></i>
+                    <span>Battles Fought: <span id="total-battles">0</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tips-container">
+            <div class="tip">
+                <i class="fas fa-lightbulb"></i>
+                <span id="random-tip">Tip: Import custom mobs with sprites for better visuals!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unit Gallery -->
+    <div id="screen-gallery" class="screen hidden">
+        <div class="gallery-panel">
+            <div class="gallery-header">
+                <h2><i class="fas fa-images"></i> Unit Gallery</h2>
+                <button class="back-btn" onclick="goToMenu()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+            
+            <div class="gallery-grid" id="unit-gallery">
+                <!-- Units will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Importer -->
+    <div id="screen-importer" class="screen hidden">
+        <div class="importer-panel">
+            <div class="importer-header">
+                <h2><i class="fas fa-file-import"></i> Advanced Mob Importer</h2>
+                <p class="subtitle">Import custom units with sprites, weapons, and special abilities</p>
+            </div>
+            
+            <div class="importer-tabs">
+                <button class="tab-btn active" onclick="switchTab('json-tab')">JSON Import</button>
+                <button class="tab-btn" onclick="switchTab('visual-tab')">Visual Builder</button>
+                <button class="tab-btn" onclick="switchTab('sprites-tab')">Sprite Manager</button>
+            </div>
+            
+            <div class="tab-content active" id="json-tab">
+                <div class="import-zone">
+                    <div class="drop-zone" id="drop-zone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drop JSON files here</h3>
+                        <p>or click to browse</p>
+                        <input type="file" id="mob-file-input" accept=".json,.agm,.arena" multiple>
+                    </div>
+                    
+                    <div class="import-options">
+                        <h4><i class="fas fa-cog"></i> Import Options</h4>
+                        <div class="option-group">
+                            <label class="checkbox">
+                                <input type="checkbox" id="auto-download-sprites" checked>
+                                <span>Auto-download sprite images</span>
+                            </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="validate-json" checked>
+                                <span>Validate JSON structure</span>
+                            </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="replace-existing">
+                                <span>Replace existing units with same name</span>
+                            </label>
+                        </div>
+                        
+                        <div class="import-preview" id="import-preview">
+                            <h5><i class="fas fa-eye"></i> Preview</h5>
+                            <div id="preview-content">No file selected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="visual-tab">
+                <div class="visual-builder">
+                    <h4><i class="fas fa-paint-brush"></i> Visual Unit Builder</h4>
+                    <!-- Visual builder will be implemented in JS -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="sprites-tab">
+                <div class="sprite-manager">
+                    <h4><i class="fas fa-image"></i> Sprite Library</h4>
+                    <!-- Sprite manager will be implemented in JS -->
+                </div>
+            </div>
+            
+            <div class="import-messages" id="import-messages">
+                <!-- Messages will appear here -->
+            </div>
+            
+            <div class="importer-footer">
+                <button class="btn secondary" onclick="goToMenu()">
+                    <i class="fas fa-arrow-left"></i> Back to Menu
+                </button>
+                <button class="btn primary" onclick="batchImport()" id="batch-import-btn">
+                    <i class="fas fa-bolt"></i> Import All Selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Screen -->
+    <div id="screen-setup" class="screen hidden">
+        <div class="setup-panel">
+            <div class="setup-header">
+                <h2><i class="fas fa-cogs"></i> Arena Configuration</h2>
+                <div class="arena-meta">
+                    <span id="total-units-count">0 units</span>
+                    <span id="arena-balance">Balance: Neutral</span>
+                </div>
+            </div>
+            
+            <div class="setup-body">
+                <div class="arena-settings">
+                    <h3><i class="fas fa-expand"></i> Arena Settings</h3>
+                    <div class="setting-group">
+                        <label>Arena Size <span id="arena-size-value">95%</span></label>
+                        <input type="range" id="arena-slider" min="50" max="100" value="95" class="styled-slider">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Environment</label>
+                        <select id="arena-environment" class="styled-select">
+                            <option value="void">Void Arena</option>
+                            <option value="grass">Grass Field</option>
+                            <option value="desert">Desert</option>
+                            <option value="ice">Ice Rink</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Physics Mode</label>
+                        <select id="physics-mode" class="styled-select">
+                            <option value="normal">Normal Physics</option>
+                            <option value="low_friction">Low Friction</option>
+                            <option value="bouncy">Bouncy</option>
+                            <option value="sticky">Sticky</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="units-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-users"></i> Unit Squads</h3>
+                        <button class="btn-icon" onclick="showQuickAdd()" title="Quick Add Units">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="units-container">
+                        <div id="setup-list" class="units-grid">
+                            <!-- Units will be added here -->
+                        </div>
+                        
+                        <div class="empty-state" id="empty-units">
+                            <i class="fas fa-user-plus"></i>
+                            <p>No units added yet. Click below to add some!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="units-controls">
+                        <button class="btn secondary" onclick="addFromGallery()">
+                            <i class="fas fa-images"></i> Add from Gallery
+                        </button>
+                        <button class="btn secondary" onclick="randomizeSquads()">
+                            <i class="fas fa-random"></i> Randomize
+                        </button>
+                        <button class="btn danger" onclick="clearAllUnits()">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="setup-footer">
+                <button class="btn secondary" onclick="goToMenu()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="btn primary" id="start-battle-btn" onclick="startGame()">
+                    <i class="fas fa-fist-raised"></i> START BATTLE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div id="modal-quick-add" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Quick Add Units</h3>
+                <button class="close-modal" onclick="closeQuickAdd()">&times;</button>
+            </div>
+            <div class="modal-body" id="quick-add-content">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="screen-game" class="screen hidden" style="padding:0; background:#000;">
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- Enhanced HUD -->
+        <div id="game-hud">
+            <div class="hud-top">
+                <div class="hud-timer">
+                    <i class="fas fa-clock"></i> <span id="hud-time">0.0</span>s
+                </div>
+                <div class="hud-alive">
+                    <i class="fas fa-heartbeat"></i> <span id="hud-alive">0</span> ALIVE
+                </div>
+                <div class="hud-zoom">
+                    <i class="fas fa-search"></i> <span id="hud-zoom">1.0x</span>
+                </div>
+            </div>
+            
+            <div class="hud-units">
+                <!-- Unit status will be added here -->
+            </div>
+        </div>
+        
+        <!-- Enhanced Controls -->
+        <div id="game-controls">
+            <div class="control-group">
+                <button class="control-btn" onclick="togglePause()" id="pause-btn">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <div class="speed-control">
+                    <button class="speed-btn" onclick="adjustSpeed(-0.5)">-</button>
+                    <span id="speed-display">1.0x</span>
+                    <button class="speed-btn" onclick="adjustSpeed(0.5)">+</button>
+                </div>
+                <button class="control-btn" onclick="toggleCameraMode()">
+                    <i class="fas fa-video" id="camera-icon"></i>
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <button class="control-btn danger" onclick="abortGame()">
+                    <i class="fas fa-stop-circle"></i> ABORT
+                </button>
+            </div>
+        </div>
+        
+        <!-- Cinematic Elements -->
+        <div id="cinematic-overlay">
+            <div id="countdown-text"></div>
+            <div id="kill-feed"></div>
+            <div id="slow-mo-indicator" class="hidden">
+                <i class="fas fa-hourglass-half"></i> SLOW MOTION
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="screen-summary" class="screen hidden">
+        <div class="results-panel">
+            <div class="results-header">
+                <h1><i class="fas fa-trophy"></i> BATTLE RESULTS</h1>
+                <div id="winner-display">
+                    <h2 id="winner-text">-</h2>
+                    <div id="winner-badge">
+                        <i class="fas fa-crown"></i> VICTORY
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-body">
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <h3><i class="fas fa-clock"></i> Battle Duration</h3>
+                        <p class="stat-value" id="battle-time">0.0s</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-crosshairs"></i> Total Damage</h3>
+                        <p class="stat-value" id="total-damage">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-skull-crossbones"></i> Eliminations</h3>
+                        <p class="stat-value" id="total-kills">0</p>
+                    </div>
+                </div>
+                
+                <div class="units-ranking">
+                    <h3><i class="fas fa-chart-bar"></i> Unit Performance</h3>
+                    <div class="table-container">
+                        <table id="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>Damage</th>
+                                    <th>Kills</th>
+                                    <th>Survival</th>
+                                    <th>MVP Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="replay-controls">
+                    <h3><i class="fas fa-film"></i> Battle Replay</h3>
+                    <div class="replay-options">
+                        <button class="btn secondary" onclick="saveReplay()">
+                            <i class="fas fa-save"></i> Save Replay
+                        </button>
+                        <button class="btn secondary" onclick="showBattleStats()">
+                            <i class="fas fa-chart-pie"></i> Detailed Stats
+                        </button>
+                        <button class="btn primary" onclick="startGame()">
+                            <i class="fas fa-redo"></i> Rematch
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-footer">
+                <button class="btn secondary" onclick="goToSetup()">
+                    <i class="fas fa-cogs"></i> New Setup
+                </button>
+                <button class="btn secondary" onclick="goToMenu()">
+                    <i class="fas fa-home"></i> Main Menu
+                </button>
+                <button class="btn primary" onclick="shareResults()">
+                    <i class="fas fa-share-alt"></i> Share Results
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="modal-tutorial" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2><i class="fas fa-graduation-cap"></i> Arena Game Tutorial</h2>
+                <button class="close-modal" onclick="closeTutorial()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-content">
+                    <!-- Tutorial content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/mob.js"></script>
+    <script src="js/import.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
